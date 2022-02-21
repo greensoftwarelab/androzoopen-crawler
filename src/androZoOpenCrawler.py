@@ -21,12 +21,17 @@ class AndroZooOpenCrawler(object):
         for i,release in enumerate(app_releases):
             if i >= max_releases:
                 return
+            if not isinstance(release, dict):
+                continue
             zip_url = release['zipball_url']
             version = "unknown" if "tag_name" not in release else release['tag_name']
             out_dir = os.path.join(output_dir, version)
             if not os.path.exists(out_dir):
                 os.mkdir(out_dir)
             output_file =  os.path.join( out_dir, f"{app_pkg}-{version}.zip")
+            if os.path.exists(output_file):
+                print(f"{output_file} already exists. skipping download")
+                continue
             cmd = f"wget -O {output_file} {zip_url}"
             r,o,e = execute_shell_command(cmd)
             if r!=0:
