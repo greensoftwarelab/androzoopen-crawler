@@ -36,7 +36,7 @@ class AndroZooOpenCrawler(object):
             print(f'Downloading app {app_pkg}')
             r,o,e = execute_shell_command(cmd)
             if r!=0:
-                raise Exception(f"error in command {cmd}")
+                print(f"error in command {cmd}")
             self.save_release_info( release, output_file.replace(".zip", ".json")  )
 
     def get_app_releases(self, app_repo_id):
