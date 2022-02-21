@@ -33,6 +33,7 @@ class AndroZooOpenCrawler(object):
                 print(f"{output_file} already exists. skipping download")
                 continue
             cmd = f"wget -O {output_file} {zip_url}"
+            print(f'Downloading app {app_pkg}')
             r,o,e = execute_shell_command(cmd)
             if r!=0:
                 raise Exception(f"error in command {cmd}")
@@ -46,9 +47,19 @@ class AndroZooOpenCrawler(object):
         cmd = f"curl -u {username}:{OAUTH_TOKEN} https://api.github.com/repos/{app_repo_id}/releases"
         r,o,e = execute_shell_command(cmd)
         val = json.loads(o)
-        if r != 0 or 'message' in json.loads(o):
-            print("error: api error or no releases found for this app")
-            val = {}
+        if r != 0 or 'message' in val:
+            if 'message' in val and "Moved Permanently" in val['message'] and 'url' in val:
+                cmd = f"curl -u {username}:{OAUTH_TOKEN} {val['url']}"
+                r,o,e = execute_shell_command(cmd)
+                val = json.loads(o)
+                if r != 0 or 'message' in val:
+                    print("error: api error or no releases found for this app")
+                    val = {}
+                    print(o)
+            else:
+                print("error: api error or no releases found for this app")
+                val = {}
+                print(o)
         return val
 
     def get_play_store_category(self, app_package):
@@ -81,10 +92,11 @@ class AndroZooOpenCrawler(object):
             app_category = self.get_play_store_category(app_pkg)
             self.stats['categories'][app_category] = [app_pkg] if app_category not in self.stats['categories'] else self.stats['categories'][app_category] + [app_pkg]
             app_github_releases = self.get_app_releases(row['entry'])
+            #if len(app_github_releases) == 0:
+            return
             out_dir =  os.path.join(self.config_obj['output_dir'], "downloads", app_category , app_pkg)
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
-            print(f'Downloading app {app_pkg}')
             #print(json.dumps(app_github_releases, indent=2))
             self.downloadGithubReleases(app_pkg, app_github_releases, out_dir)
         else:
