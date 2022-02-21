@@ -39,10 +39,17 @@ class AndroZooOpenCrawler(object):
             self.save_release_info( release, output_file.replace(".zip", ".json")  )
 
     def get_app_releases(self, app_repo_id):
-        #cmd = f"curl -H "Authorization: token ${OAUTH_TOKEN}" --silent "https://api.github.com/repos/${repo_id}/releases""
-        cmd = f"curl https://api.github.com/repos/{app_repo_id}/releases"
+        print(app_repo_id)
+        OAUTH_TOKEN =  self.config_obj['github']['oauth_token']
+        username = self.config_obj['github']['username']
+        #cmd = f"curl -u {username}:{OAUTH_TOKEN} --silent \"https://api.github.com/repos/${app_repo_id}/releases\""
+        cmd = f"curl -u {username}:{OAUTH_TOKEN} https://api.github.com/repos/{app_repo_id}/releases"
         r,o,e = execute_shell_command(cmd)
-        return {} if r != 0 else json.loads(o)
+        val = json.loads(o)
+        if r != 0 or 'message' in json.loads(o):
+            print("error: api error or no releases found for this app")
+            val = {}
+        return val
 
     def get_play_store_category(self, app_package):
         cmd = f"scrapy runspider src/play_category_crawler.py  -a url=https://play.google.com/store/apps/details?id={app_package} -s LOG_ENABLED=False"

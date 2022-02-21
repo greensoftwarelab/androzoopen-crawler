@@ -1,16 +1,14 @@
 {
     "github": {
-        "username": "RRua"
+        "username": "RRua",
+        "oauth_token" : "<your-api-key-here>"
     },
     "output_dir": "out",
     "input_file": "in/androzooopen.csv",
     "releases_per_app_to_download" : 1,
     "filters": {
         "num_releases" : {
-            "min" : 3
-        },
-        "on_googleplay": {
-            "value": "Yes"
+            "min" : 1
         },
         "data_source": {
             "value": "github"
