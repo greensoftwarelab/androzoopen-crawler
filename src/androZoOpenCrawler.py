@@ -1,4 +1,6 @@
+from curses import noecho
 import json, csv, os
+from tkinter import N
 from utils import execute_shell_command, is_number
 
 def get_config(config_file):
@@ -65,7 +67,7 @@ class AndroZooOpenCrawler(object):
     def get_play_store_category(self, app_package):
         cmd = f"scrapy runspider src/play_category_crawler.py  -a url=https://play.google.com/store/apps/details?id={app_package} -s LOG_ENABLED=False"
         r,o,e = execute_shell_command(cmd)
-        return None if r != 0 else o.strip()
+        return None if r != 0 else (o.strip() if o.strip() != '' else None)
 
     def row_passes_filter(self, row):
         for filter, constraints in self.config_obj['filters'].items():
@@ -89,7 +91,7 @@ class AndroZooOpenCrawler(object):
             return
         app_pkg = row['package_name']
         if row['data_source'].lower() == 'github':
-            app_category = self.get_play_store_category(app_pkg)
+            app_category = f"{self.get_play_store_category(app_pkg)}"
             self.stats['categories'][app_category] = [app_pkg] if app_category not in self.stats['categories'] else self.stats['categories'][app_category] + [app_pkg]
             app_github_releases = self.get_app_releases(row['entry'])
             #if len(app_github_releases) == 0:
