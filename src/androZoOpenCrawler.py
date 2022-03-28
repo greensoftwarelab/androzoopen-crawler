@@ -1,6 +1,4 @@
-from curses import noecho
 import json, csv, os
-from tkinter import N
 from utils import execute_shell_command, is_number
 
 def get_config(config_file):
